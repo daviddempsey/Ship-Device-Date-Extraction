@@ -50,7 +50,7 @@ if "-l" in sys.argv:
 
 #if "SerialInstruments" in path:
 #   print("recognized as SerialInstrument")
-dateparser(cruise, path, filepattern, printsql, datelog, filelog)
+dateparser(cruise, path, printsql, datelog, filelog)
 
 #else:
-#    multibeamdateparser(cruise, path, filepattern, printsql, datelog, filelog)
+#    multibeamdateparser(cruise, path, printsql, datelog, filelog)

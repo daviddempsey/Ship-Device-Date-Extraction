@@ -111,12 +111,11 @@ def dateparser(cruise, path, filepattern, printsql, datelog, filelog):
             sql_datetime_update, sql_startend_update, cruise)
 
 
-def massDateParse(cruise_prefix, fileset_num, printsql, datelog, filelog):
+def massDateParse(cruise_prefix, printsql, datelog, filelog):
     """
     Runs dateparse on various cruises and instruments
 
     cruise_prefix: The cruise prefix to run dateparse on
-    fileset_num: The fileset number identifier
     printsql: True if printing to console, false otherwise
     datelog: True if creating SQL of min/max cruise range, false otherwise
     filelog: True if logging SQL to files, false otherwise
@@ -127,7 +126,7 @@ def massDateParse(cruise_prefix, fileset_num, printsql, datelog, filelog):
         SI_path = "/data/sensor/serial_logger"
     elif cruise_prefix == "OC":
         SI_path = "/das"
-    full_dir_list = os.listdir(cruise_path + fileset_num + "/")
+    full_dir_list = os.listdir(cruise_path)
 
     if cruise_prefix != "OC": # filters to just .tar directories
         roger_regex = re.compile(r'^' + cruise_prefix + '.*tar$')
@@ -139,7 +138,7 @@ def massDateParse(cruise_prefix, fileset_num, printsql, datelog, filelog):
         # needs to be updated for use on R2R
         if cruise_prefix != "OC":
             cruise = cruise[:-4]
-        path = cruise_path + fileset_num + "/"  \
+        path = cruise_path  \
                     + cruise + SI_path
 
         try:
@@ -157,22 +156,21 @@ def massDateParse(cruise_prefix, fileset_num, printsql, datelog, filelog):
                     datelog, filelog)
 
 ### NEEDS TO BE UPDATED FOR GDC ###
-def multibeamMassDateParse(cruise_prefix, fileset_num, printsql, datelog, filelog):
+def multibeamMassDateParse(cruise_prefix, printsql, datelog, filelog):
     """
     Runs dateparse on various cruises for Multibeam
 
     cruise_prefix: The cruise prefix to run dateparse on
-    fileset_num: The fileset number identifier
     printsql: True if printing to console, false otherwise
     datelog: True if creating SQL of min/max cruise range, false otherwise
     filelog: True if logging SQL to files, false otherwise
     """
-    full_dir_list = os.listdir("/scratch/r2r/edu.ucsd.sio/" + fileset_num + "/")
+    full_dir_list = os.listdir("/scratch/r2r/edu.ucsd.sio/" + "/")
     roger_regex = re.compile(r'^' + cruise_prefix + '.*tar$')
     dir_list = filter(lambda i: roger_regex.search(i), full_dir_list)
 
     for cruise in dir_list:
-        path = "/scratch/r2r/edu.ucsd.sio/" + fileset_num + "/"  \
+        path = "/scratch/r2r/edu.ucsd.sio/"  \
                     + cruise + "/" + cruise[:-4] + "/data/multibeam/rawdata"
 
         if (os.path.isdir(path)):

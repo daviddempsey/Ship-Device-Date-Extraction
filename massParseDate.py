@@ -5,7 +5,7 @@ import sys
 
 if (len(sys.argv) == 1 or sys.argv[1] == '-h'):
   print("\nArguments for massParseDate.py:\n ")
-  print("./massParseDate.py [cruise prefix] [fileset number] [any flags]")
+  print("./massParseDate.py [cruise prefix] [any flags]")
   print("DEFAULT: prints SQL, min/max date range, and write log file")
   print("-u: prints SQL")
   print("-m: writes date range update SQL to log file")
@@ -21,7 +21,6 @@ filelog = False
 SI = False
 MB = False
 cruise_prefix = sys.argv[1]
-fileset_num = sys.argv[2]
 
 
 if "-u" in sys.argv:
@@ -40,7 +39,7 @@ if "-MB" in sys.argv:
   MB = True
 
 if SI:
-  massDateParse(cruise_prefix, fileset_num, printsql, datelog, filelog)
+  massDateParse(cruise_prefix, printsql, datelog, filelog)
 
 if MB:
-  multibeamMassDateParse(cruise_prefix, fileset_num, printsql, datelog, filelog)
+  multibeamMassDateParse(cruise_prefix, printsql, datelog, filelog)
