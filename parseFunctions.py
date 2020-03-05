@@ -39,24 +39,30 @@ def dateparser(cruise, path, filepattern, printsql, datelog, filelog):
 
     print("Running dateparser")
     directory_files = [f for f in listdir(path) if isfile(join(path, f))]
-    # untested regex function
     raw_regex = regex_identifier(cruise, filepattern)
     if (raw_regex):
         directory_files = filter(lambda i: raw_regex.search(i), directory_files)
     else:
-        print("Issue with regex, check identifier")
-        return
+        if cruise[:3] == "SKQ":
+            pass
+        else:
+            print("Issue with regex, check identifier")
+            return
     if len(directory_files) == 0:
         print("EMPTY")
         return
 
-    mindate,maxdate = parse_date_ranges(cruise, directory_files, filepattern)
+
+    mindate,maxdate = datetime.datetime.today(), datetime.datetime(1901, 1, 1)
+
 
     sql_datetime_update = []
     sql_startend_update = ''
 
     for filename in directory_files:
-        if (len(filename.split('_')) > 1 and len(filename) >= 8 and re.match("^[0-9]*$", filename.split('_')[-1][:8])):
+        if (len(filename.split('_')) > 1 and len(filename) >= 8 \
+        and (re.match("^[0-9]*$", filename.split('_')[-1][:8]) or \
+        re.match("^[0-9]*$", filename.split('T')[0][-8:]))):
             if (filepattern == "multibeam"):
                 file_date = filename.split('_')[1]  # grabs date information
                 file_time = filename.split('_')[2]
@@ -80,6 +86,22 @@ def dateparser(cruise, path, filepattern, printsql, datelog, filelog):
                 hour= file_time[0:2]
                 minute= file_time[2:4]
                 second= file_time[4:6]
+
+            elif cruise[:3] == "SKQ":
+                try:
+                    date_time = filename.split('.')[1]
+                    file_date = date_time.split('T')[0]
+                    file_time = date_time.split('T')[1][:-1]
+                except:
+                    print("error parsing file date/time for SKQ")
+                    return
+                year= file_date[0:4]
+                month= file_date[4:6]
+                day= file_date[6:8]
+                hour= file_time[0:2]
+                minute= file_time[2:4]
+                second = "00"
+
             else:
                 file_date = filename.split('_')[-1]  # grabs date information
                 year = file_date[0:4]
@@ -126,6 +148,8 @@ def massDateParse(cruise_prefix, printsql, datelog, filelog):
         SI_path = "/data/sensor/serial_logger"
     elif cruise_prefix == "OC":
         SI_path = "/das"
+    elif cruise_prefix == "SKQ":
+        SI_path = "/lds/raw"
     full_dir_list = os.listdir(cruise_path)
 
     if cruise_prefix != "OC": # filters to just .tar directories
@@ -137,10 +161,12 @@ def massDateParse(cruise_prefix, printsql, datelog, filelog):
 
     for cruise in dir_list:
         # needs to be updated for use on R2R
-        if cruise_prefix != "OC":
+        if cruise_prefix == "SKQ":
+            path = cruise_path + cruise + "/" + cruise[:-4] + SI_path
+        elif cruise_prefix != "OC":
             cruise = cruise[:-4]
-        path = cruise_path  \
-                    + cruise + SI_path
+        else:
+            path = cruise_path + cruise + SI_path
 
         try:
             instruments_list = os.walk(path).next()[1]
@@ -149,6 +175,8 @@ def massDateParse(cruise_prefix, printsql, datelog, filelog):
             print(path)
             continue
         for instrument in instruments_list:
+            if instrument == 'events':
+                pass
             instrument_path = path + "/" + instrument
         #    print("CRUISE: " + cruise)
         #    print("INSTRUMENT: " + instrument)

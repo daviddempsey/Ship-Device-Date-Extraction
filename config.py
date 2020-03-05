@@ -5,9 +5,6 @@
 # ## Purpose:
 # Important information for R2R scripts. Be mindful changing these values.
 
-HLY_cruise_path = "/mnt/gdc/data/r2r/scratch/mil.uscg/"
-SIO_cruise_path = "/mnt/gdc/data/r2r/scratch/edu.ucsd.sio/"
-OC_cruise_path = "/mnt/gdc/data/r2r/scratch/edu.oregonstate/"
 codedir = "/mnt/gdc/code/scripts/"
 operator_uaf = "edu.uaf"
 operator_sio = "edu.ucsd.sio/SR_2019"
@@ -35,7 +32,7 @@ ships = {
 ship_directory = {
     'Healy': '/mnt/gdc/data/r2r/scratch/mil.uscg',
     'SallyRide': '/mnt/gdc/data/r2r/scratch/edu.ucsd.sio',
-    'Sikuliaq': '/mnt/gdc/data/r2r/scratch/edu.ucsd.sio',
+    'Sikuliaq': '/mnt/gdc/data/r2r/scratch/edu.uaf',
     'Sproul': '/mnt/gdc/data/r2r/scratch/edu.ucsd.sio',
     'Oceanus': '/mnt/gdc/data/r2r/scratch/edu.oregonstate'
 }
@@ -73,16 +70,21 @@ op_from_cruise = {
     'OC': operator_osu,
     'SKQ': operator_uaf
 }
-path_identifier = {
-    'HLY': HLY_cruise_path,
-    'SP': SIO_cruise_path,
-    'RR': SIO_cruise_path,
-    'SR': SIO_cruise_path,
-    'OC': OC_cruise_path
-}
 SI_identifier = {
     'HLY': "/data/sensor/serial_logger",
     'SP': "/data/SerialInstruments",
     'RR': "/data/SerialInstruments",
     'SR': "/data/SerialInstruments"
+}
+HLY_cruise_path = ship_directory['Healy'] + '/'
+SIO_cruise_path = "/mnt/gdc/data/r2r/scratch/edu.ucsd.sio/"
+OC_cruise_path = ship_directory['Oceanus'] + '/'
+SKQ_cruise_path = ship_directory['Sikuliaq'] + '/'
+path_identifier = {
+    'HLY': HLY_cruise_path,
+    'SP': SIO_cruise_path,
+    'RR': SIO_cruise_path,
+    'SR': SIO_cruise_path,
+    'OC': OC_cruise_path,
+    'SKQ': SKQ_cruise_path
 }
