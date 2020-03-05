@@ -11,9 +11,9 @@ import re
 import os
 from os import listdir
 from os.path import isfile, join
-import datetime
 from config import *
 from scripts import *
+import datetime
 
 __author__ = "David Dempsey"
 __copyright__ = "Copyright 2019, Rolling Deck to Repository"
@@ -131,8 +131,9 @@ def massDateParse(cruise_prefix, printsql, datelog, filelog):
     if cruise_prefix != "OC": # filters to just .tar directories
         roger_regex = re.compile(r'^' + cruise_prefix + '.*tar$')
         dir_list = filter(lambda i: roger_regex.search(i), full_dir_list)
-    else:
-        dir_list = full_dir_list
+    elif cruise_prefix == "OC":
+        roger_regex = re.compile(r'^' + cruise_prefix.lower() + '\d*\w$')
+        dir_list = filter(lambda i: roger_regex.search(i), full_dir_list)
 
     for cruise in dir_list:
         # needs to be updated for use on R2R
@@ -165,7 +166,7 @@ def multibeamMassDateParse(cruise_prefix, printsql, datelog, filelog):
     datelog: True if creating SQL of min/max cruise range, false otherwise
     filelog: True if logging SQL to files, false otherwise
     """
-    full_dir_list = os.listdir("/scratch/r2r/edu.ucsd.sio/" + "/")
+    full_dir_list = os.listdir("/scratch/r2r/edu.ucsd.sio/")
     roger_regex = re.compile(r'^' + cruise_prefix + '.*tar$')
     dir_list = filter(lambda i: roger_regex.search(i), full_dir_list)
 
@@ -179,8 +180,10 @@ def multibeamMassDateParse(cruise_prefix, printsql, datelog, filelog):
 
 def daterange2csv(cruise, device, mindate, maxdate):
     cruise_abbrev = get_ship_abbreviation(cruise)
-    f = open("./dateparselogs/dateranges/{}_dateranges.csv".format(cruise_abbrev), "a")
-    f.write('{}, {}, {}, {}'.format(cruise, device, mindate, maxdate) + '\n')
+    f = open("./dateparselogs/dateranges/{}_dateranges.csv".format(cruise_abbrev), "a+")
+    if not f.read(1):
+        f.write("cruise,devicetype,start_date,end_date\n")
+    f.write('{},{},{},{}'.format(cruise, device, mindate, maxdate) + '\n')
     f.close()
 
 
