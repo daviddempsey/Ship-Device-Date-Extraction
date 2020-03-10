@@ -38,6 +38,7 @@ def dateparser(cruise, path, filepattern, printsql, datelog, filelog):
     """
 
     print("Running dateparser")
+    cruise = cruise.upper()
     directory_files = [f for f in listdir(path) if isfile(join(path, f))]
     raw_regex = regex_identifier(cruise, filepattern)
     if (raw_regex):
@@ -52,15 +53,13 @@ def dateparser(cruise, path, filepattern, printsql, datelog, filelog):
         print("EMPTY")
         return
 
-
     mindate,maxdate = datetime.datetime.today(), datetime.datetime(1901, 1, 1)
-
 
     sql_datetime_update = []
     sql_startend_update = ''
 
     for filename in directory_files:
-        if (len(filename.split('_')) > 1 and len(filename) >= 8 \
+        if (len(filename) >= 8 \
         and (re.match("^[0-9]*$", filename.split('_')[-1][:8]) or \
         re.match("^[0-9]*$", filename.split('T')[0][-8:]))):
             if (filepattern == "multibeam"):
@@ -73,7 +72,7 @@ def dateparser(cruise, path, filepattern, printsql, datelog, filelog):
                 minute = file_time[2:4]
                 second = file_time[4:6]
 
-            elif cruise[:2] == "oc":
+            elif cruise[:2] == "OC":
                 try:
                     file_date = filename.split('_')[1]
                     file_time = filename.split('-')[-1]
@@ -120,7 +119,7 @@ def dateparser(cruise, path, filepattern, printsql, datelog, filelog):
                 maxdate = filedate
 
             sql_datetime_update.append(generate_file_time_sql(year, month, \
-                                        day, hour, minute, second, cruise,\
+                                    day, hour, minute, second, cruise,\
                                         filename))
     sql_startend_update = generate_cruise_startend_sql(mindate, maxdate, \
                                                        cruise)
@@ -161,12 +160,15 @@ def massDateParse(cruise_prefix, printsql, datelog, filelog):
 
     for cruise in dir_list:
         # needs to be updated for use on R2R
+        if cruise_prefix != "OC" and cruise_prefix != "SKQ":
+            cruise = cruise[:-4]
+        path = cruise_path + cruise + SI_path
+
         if cruise_prefix == "SKQ":
             path = cruise_path + cruise + "/" + cruise[:-4] + SI_path
-        elif cruise_prefix != "OC":
             cruise = cruise[:-4]
-        else:
-            path = cruise_path + cruise + SI_path
+
+        cruise = cruise.upper()
 
         try:
             instruments_list = os.walk(path).next()[1]
@@ -298,7 +300,7 @@ def regex_identifier(cruise, filepattern):
             return re.compile(r'\w+.all$')
         else:
             return re.compile(r'\w+.raw$')
-    elif (cruise[:2] == "oc"):
+    elif (cruise[:2] == "OC"):
         return re.compile(r'\w+.Raw$')
 
 def parse_date_ranges(cruise, directory_files, filepattern):
@@ -332,7 +334,7 @@ def parse_date_ranges(cruise, directory_files, filepattern):
             minhour=maxhour= int(minmaxdate[8:10])
             minminute=maxminute= int(minmaxdate[10:12])
             minsecond=maxsecond= int(minmaxdate[12:14])
-    elif (cruise[:2] == "oc"):
+    elif (cruise[:2] == "OC"):
         try:
             minmaxdate = directory_files[0].split('_')[1]
             minmaxtime = directory_files[0].split('-')[-1]
