@@ -3,7 +3,8 @@
 This program contains functions needed to successfully create SQL logs of
 the starting date of files in filesets and to create min/max cruise range
 SQL logs. The code is relatively modular and is designed to handle various
-cruises and filesets. As of now, only Roger Revelle and Oceanus are supported.
+cruises and filesets. As of now, only Roger Revelle, Oceanus, Sproul, 
+Sikuliaq, and Healy are supported.
 """
 
 import sys
@@ -14,6 +15,7 @@ from os.path import isfile, join
 from config import *
 from scripts import *
 import datetime
+import logging
 
 __author__ = "David Dempsey"
 __copyright__ = "Copyright 2019, Rolling Deck to Repository"
@@ -25,8 +27,18 @@ __maintainer__ = "David Dempsey"
 __email__ = "ddempsey@ucsd.edu"
 __status__ = "Production"
 
+script_dir = os.getcwd()
+os.chdir(log_dir) # creates log file
+logging.basicConfig(format='%(asctime)s %(message)s', filename='%s' %
+                    (datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S_') +
+                        'parseFunctions.py'),
+                    level=logging.INFO)
+logging.info('parseFunctions.py executed')
+os.chdir(script_dir)
+
 def dateparser(cruise, filepattern, printsql, datelog, filelog):
-    """Creates SQL logs of the starting date of files in filesets and also
+    """
+    Creates SQL logs of the starting date of files in filesets and also
     creates min/max cruise range SQL logs
 
     cruise: The cruise ID
@@ -37,7 +49,7 @@ def dateparser(cruise, filepattern, printsql, datelog, filelog):
     filelog: True if logging SQL to files, false otherwise
     """
 
-    print("Running dateparser")
+    logging.info("Running dateparser on cruise {} and device {}".format(cruise, filepattern))
 
     cruise_prefix = get_ship_abbreviation(cruise)
     cruise_path = path_identifier[cruise_prefix]
@@ -58,11 +70,16 @@ def dateparser(cruise, filepattern, printsql, datelog, filelog):
         if cruise[:3] == "SKQ":
             pass
         else:
+            os.chdir(log_dir)
+            logging.error("Issue with regex, check identifier")
+            os.chdir(script_dir)
             print("Issue with regex, check identifier")
             return
     if len(directory_files) == 0:
-        print("EMPTY OR ERROR FOR CRUISE {} AND DEVICE {}".format(cruise,
-                                                                filepattern))
+        os.chdir(log_dir)
+        logging.error("Empty directory or other error for cruise {} and device {}".format(cruise, filepattern))
+        os.chdir(script_dir)
+        print("EMPTY OR ERROR FOR CRUISE {} AND DEVICE {}".format(cruise, filepattern))
         return
 
     mindate,maxdate = datetime.datetime.today(), datetime.datetime(1901, 1, 1)
@@ -89,7 +106,10 @@ def dateparser(cruise, filepattern, printsql, datelog, filelog):
                     file_date = filename.split('_')[1]
                     file_time = filename.split('-')[-1]
                 except:
-                    print("error parsing file date/time for OC")
+                    os.chdir(log_dir)
+                    logging.error("Issue parsing file date/time for OC")
+                    os.chdir(script_dir)
+                    print("Error parsing file date/time for OC")
                     return
                 year= file_date[0:4]
                 month= file_date[4:6]
@@ -104,7 +124,10 @@ def dateparser(cruise, filepattern, printsql, datelog, filelog):
                     file_date = date_time.split('T')[0]
                     file_time = date_time.split('T')[1][:-1]
                 except:
-                    print("error parsing file date/time for SKQ")
+                    os.chdir(log_dir)
+                    logging.error("Issue parsing file date/time for SKQ")
+                    os.chdir(script_dir)
+                    print("Error parsing file date/time for SKQ")
                     return
                 year= file_date[0:4]
                 month= file_date[4:6]
@@ -140,7 +163,7 @@ def dateparser(cruise, filepattern, printsql, datelog, filelog):
     sql_datetime_update.sort()
 
 
-    logging(printsql, filelog, filepattern, datelog, mindate, maxdate, \
+    log(printsql, filelog, filepattern, datelog, mindate, maxdate, \
             sql_datetime_update, sql_startend_update, cruise)
 
 
@@ -179,15 +202,15 @@ def massDateParse(cruise_prefix, printsql, datelog, filelog):
         try:
             instruments_list = os.walk(path).next()[1]
         except:
-            print("Unable to get instrument list")
+            os.chdir(log_dir)
+            logging.error("Unable to get instrument list for cruise {} at location {}".format(cruise, path))
+            os.chdir(script_dir)
+            print("Unable to get instrument list for cruise {}".format(cruise))
             print(path)
             continue
         for instrument in instruments_list:
             if instrument == 'events':
                 pass
-        #    print("CRUISE: " + cruise)
-        #    print("INSTRUMENT: " + instrument)
-        #    print("PATH: " + instrument_path)
             dateparser(cruise, instrument, printsql, \
                     datelog, filelog)
 
@@ -213,7 +236,10 @@ def cruiseDateParse(cruise, printsql, datelog, filelog):
     try:
         instruments_list = os.walk(path).next()[1]
     except:
-        print("Unable to get instrument list")
+        os.chdir(log_dir)
+        logging.error("Unable to get instrument list for cruise {} at location {}".format(cruise, path))
+        os.chdir(script_dir)
+        print("Unable to get instrument list for cruise {}".format(cruise))
         print(path)
     for instrument in instruments_list:
         if instrument == 'events':
@@ -253,7 +279,7 @@ def daterange2csv(cruise, device, mindate, maxdate):
     f.close()
 
 
-def logging(printsql, filelog, filepattern, datelog, mindate,
+def log(printsql, filelog, filepattern, datelog, mindate,
             maxdate, sql_datetime_update, sql_startend_update, cruise):
     """
     Writes generated SQL out to files or to the console
@@ -269,6 +295,9 @@ def logging(printsql, filelog, filepattern, datelog, mindate,
     """
 
     if (filelog or (not filelog and not printsql and not datelog)):
+        os.chdir(log_dir)
+        logging.info("Creating SQL to update file date information.")
+        os.chdir(script_dir)
         f = open("./dateparselogs/fileupdate/" + cruise + '_' + filepattern + ".sql", "w+")
         for each in sql_datetime_update:
             f.write(each + '\n')
@@ -280,6 +309,9 @@ def logging(printsql, filelog, filepattern, datelog, mindate,
         print(sql_startend_update)
 
     if (datelog or (not filelog and not printsql and not datelog)):
+        os.chdir(log_dir)
+        logging.info("Creating SQL to update cruise min and max file range.")
+        os.chdir(script_dir)
         print('MIN DATE: ' + str(mindate))
         print('MAX DATE: ' + str(maxdate))
         f = open("./dateparselogs/minmaxupdate/" + cruise + "_MINMAX_UPDATE.sql", "w+")
@@ -420,6 +452,12 @@ def parse_file_date(filename, filepattern):
     return filedate
 
 def find_path(cruise_prefix):
+    """
+    Finds the path of the ship given a cruise prefix
+
+    cruise_prefix: Prefix of vessel name
+    """
+
     cruise_path = path_identifier[cruise_prefix]
     SI_path = "/data/SerialInstruments"
     if cruise_prefix == "HLY":
@@ -431,4 +469,3 @@ def find_path(cruise_prefix):
     elif cruise_prefix == "SP":
         SI_path = "/SerialInstruments"
     return SI_path
-
