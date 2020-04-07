@@ -25,7 +25,7 @@ __maintainer__ = "David Dempsey"
 __email__ = "ddempsey@ucsd.edu"
 __status__ = "Production"
 
-def dateparser(cruise, path, filepattern, printsql, datelog, filelog):
+def dateparser(cruise, filepattern, printsql, datelog, filelog):
     """Creates SQL logs of the starting date of files in filesets and also
     creates min/max cruise range SQL logs
 
@@ -38,8 +38,19 @@ def dateparser(cruise, path, filepattern, printsql, datelog, filelog):
     """
 
     print("Running dateparser")
-    cruise = cruise.upper()
+
+    cruise_prefix = get_ship_abbreviation(cruise)
+    cruise_path = path_identifier[cruise_prefix]
+    SI_path = find_path(cruise_prefix)
+    if (cruise_prefix == "OC"):
+        cruise = cruise.lower()
+    path = cruise_path + cruise + SI_path
+    cruise = cruise.upper();
+    if cruise_prefix == "SKQ":
+        path = cruise_path + cruise + ".tar/" + cruise + SI_path
+    path = path + '/' + filepattern
     directory_files = [f for f in listdir(path) if isfile(join(path, f))]
+    print(path)
     raw_regex = regex_identifier(cruise, filepattern)
     if (raw_regex):
         directory_files = filter(lambda i: raw_regex.search(i), directory_files)
@@ -50,7 +61,8 @@ def dateparser(cruise, path, filepattern, printsql, datelog, filelog):
             print("Issue with regex, check identifier")
             return
     if len(directory_files) == 0:
-        print("EMPTY")
+        print("EMPTY OR ERROR FOR CRUISE {} AND DEVICE {}".format(cruise,
+                                                                filepattern))
         return
 
     mindate,maxdate = datetime.datetime.today(), datetime.datetime(1901, 1, 1)
@@ -142,13 +154,7 @@ def massDateParse(cruise_prefix, printsql, datelog, filelog):
     filelog: True if logging SQL to files, false otherwise
     """
     cruise_path = path_identifier[cruise_prefix]
-    SI_path = "/data/SerialInstruments"
-    if cruise_prefix == "HLY":
-        SI_path = "/data/sensor/serial_logger"
-    elif cruise_prefix == "OC":
-        SI_path = "/das"
-    elif cruise_prefix == "SKQ":
-        SI_path = "/lds/raw"
+    SI_path = find_path(cruise_prefix)
     full_dir_list = os.listdir(cruise_path)
 
     if cruise_prefix != "OC": # filters to just .tar directories
@@ -179,12 +185,42 @@ def massDateParse(cruise_prefix, printsql, datelog, filelog):
         for instrument in instruments_list:
             if instrument == 'events':
                 pass
-            instrument_path = path + "/" + instrument
         #    print("CRUISE: " + cruise)
         #    print("INSTRUMENT: " + instrument)
         #    print("PATH: " + instrument_path)
-            dateparser(cruise, instrument_path, instrument, printsql, \
+            dateparser(cruise, instrument, printsql, \
                     datelog, filelog)
+
+
+def cruiseDateParse(cruise, printsql, datelog, filelog):
+    """
+    Runs dateparse on all instruments of a single cruise
+
+    cruise: The cruise to run dateparse on
+    printsql: True if printing to console, false otherwise
+    datelog: True if creating SQL of min/max cruise range, false otherwise
+    filelog: True if logging SQL to files, false otherwise
+    """
+    cruise = cruise.upper()
+    cruise_prefix = get_ship_abbreviation(cruise)
+    cruise_path = path_identifier[cruise_prefix]
+    SI_path = find_path(cruise_prefix)
+    path = cruise_path + cruise + SI_path
+    if cruise_prefix == "SKQ":
+        path = cruise_path + cruise + ".tar/" + cruise + SI_path
+
+    cruise = cruise.upper()
+    try:
+        instruments_list = os.walk(path).next()[1]
+    except:
+        print("Unable to get instrument list")
+        print(path)
+    for instrument in instruments_list:
+        if instrument == 'events':
+            pass
+        dateparser(cruise, instrument, printsql, \
+                datelog, filelog)
+
 
 ### NEEDS TO BE UPDATED FOR GDC ###
 def multibeamMassDateParse(cruise_prefix, printsql, datelog, filelog):
@@ -295,7 +331,8 @@ def regex_identifier(cruise, filepattern):
     filepattern: Usually the device type
     """
 
-    if (cruise[:2] == "RR" or cruise[:2] == "SR" or cruise[:3] == "HLY"):
+    if (cruise[:2] == "RR" or cruise[:2] == "SR" or cruise[:3] == "HLY"
+        or cruise[:2] == "SP"):
         if (filepattern == "multibeam"):
             return re.compile(r'\w+.all$')
         else:
@@ -312,7 +349,8 @@ def parse_date_ranges(cruise, directory_files, filepattern):
     filepattern: Usually the device type
     """
 
-    if (cruise[:2] == "RR" or cruise[:2] == "SR" or cruise[:3] == "HLY"):
+    if (cruise[:2] == "RR" or cruise[:2] == "SR" or cruise[:3] == "HLY"
+        or cruise[:2] == "SP"):
         if (filepattern == "multibeam"):
             try:
                 minmaxdate = directory_files[0].split('_')[1]
@@ -380,4 +418,17 @@ def parse_file_date(filename, filepattern):
     filedate = datetime.datetime(int(year), int(month), int(day),
         int(hour), int(minute), int(second))
     return filedate
+
+def find_path(cruise_prefix):
+    cruise_path = path_identifier[cruise_prefix]
+    SI_path = "/data/SerialInstruments"
+    if cruise_prefix == "HLY":
+        SI_path = "/data/sensor/serial_logger"
+    elif cruise_prefix == "OC":
+        SI_path = "/das"
+    elif cruise_prefix == "SKQ":
+        SI_path = "/lds/raw"
+    elif cruise_prefix == "SP":
+        SI_path = "/SerialInstruments"
+    return SI_path
 

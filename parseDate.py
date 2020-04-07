@@ -8,7 +8,7 @@ to a file. The default option is to do all three.
 """
 
 import sys
-from parseFunctions import dateparser
+from parseFunctions import dateparser, cruiseDateParse
 #from parseFunctions import multibeamdateparser
 
 __author__ = "David Dempsey"
@@ -22,16 +22,16 @@ __email__ = "ddempsey@ucsd.edu"
 __status__ = "Production"
 
 if (len(sys.argv) == 1 or sys.argv[1] == '-h'):
-	print("\nArguments for parseDate.py:\n ")
-	print("./parseDate.py [cruise] [filepattern] [path] [any flags]")
-	print("DEFAULT: prints SQL, min/max date range, and write log file")
-	print("-u: prints SQL")
-	print("-m: writes date range update SQL to log file")
-	print("-l: writes file update SQL to log file\n")
-	quit()
+    print("\nArguments for parseDate.py:\n ")
+    print("./parseDate.py [cruise] [filepattern] [any flags]")
+    print("DEFAULT: prints SQL, min/max date range, and write log file")
+    print("-u: prints SQL")
+    print("-m: writes date range update SQL to log file")
+    print("-l: writes file update SQL to log file")
+    print("-c: runs all devices for a single cruise\n")
+    quit()
 
 
-path = sys.argv[3]
 filepattern = sys.argv[2]
 cruise = sys.argv[1]
 printsql = False
@@ -40,17 +40,23 @@ filelog = False
 
 
 if "-u" in sys.argv:
-	printsql = True
+    printsql = True
 
 if "-m" in sys.argv:
-	datelog = True
+    datelog = True
 
 if "-l" in sys.argv:
-	filelog = True
+    filelog = True
+
+if "-c" in sys.argv:
+    all_devices = True
 
 #if "SerialInstruments" in path:
 #   print("recognized as SerialInstrument")
-dateparser(cruise, path, filepattern, printsql, datelog, filelog)
+if all_devices:
+    cruiseDateParse(cruise, printsql, datelog, filelog)
+else:
+    dateparser(cruise, filepattern, printsql, datelog, filelog)
 
 #else:
 #    multibeamdateparser(cruise, path, printsql, datelog, filelog)

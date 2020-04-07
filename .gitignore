@@ -1,0 +1,5 @@
+config.py
+dateparselogs
+*.pyc
+output
+logtest
