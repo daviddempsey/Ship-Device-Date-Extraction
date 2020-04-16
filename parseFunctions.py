@@ -36,6 +36,8 @@ logging.basicConfig(format='%(asctime)s %(message)s', filename='%s' %
 logging.info('parseFunctions.py executed')
 os.chdir(script_dir)
 
+isoDate = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')
+
 def dateparser(cruise, filepattern, printsql, datelog, filelog):
     """
     Creates SQL logs of the starting date of files in filesets and also
@@ -272,7 +274,7 @@ def multibeamMassDateParse(cruise_prefix, printsql, datelog, filelog):
 
 def daterange2csv(cruise, device, mindate, maxdate):
     cruise_abbrev = get_ship_abbreviation(cruise)
-    f = open("./dateparselogs/dateranges/{}_dateranges.csv".format(cruise_abbrev), "a+")
+    f = open("./dateparselogs/dateranges/{}_{}_dateranges.csv".format(isoDate, cruise_abbrev), "a+")
     if not f.read(1):
         f.write("cruise,devicetype,start_date,end_date\n")
     f.write('{},{},{},{}'.format(cruise, device, mindate, maxdate) + '\n')
