@@ -3,7 +3,7 @@
 This program contains functions needed to successfully create SQL logs of
 the starting date of files in filesets and to create min/max cruise range
 SQL logs. The code is relatively modular and is designed to handle various
-cruises and filesets. As of now, only Roger Revelle, Oceanus, Sproul, 
+cruises and filesets. As of now, only Roger Revelle, Oceanus, Sproul,
 Sikuliaq, and Healy are supported.
 """
 
@@ -180,7 +180,7 @@ def massDateParse(cruise_prefix, printsql, datelog, filelog):
     """
     cruise_path = path_identifier[cruise_prefix]
     SI_path = find_path(cruise_prefix)
-    full_dir_list = os.listdir(cruise_path)
+    full_dir_list = sorted(os.listdir(cruise_path))
 
     if cruise_prefix != "OC": # filters to just .tar directories
         roger_regex = re.compile(r'^' + cruise_prefix + '.*tar$')
