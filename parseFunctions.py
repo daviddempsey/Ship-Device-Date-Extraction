@@ -217,6 +217,88 @@ def massDateParse(cruise_prefix, printsql, datelog, filelog):
                     datelog, filelog)
 
 
+def RC_massDateParse(cruise_prefix, printsql, datelog, filelog):
+    """
+    Runs a date parse on Rachel Carson cruises
+
+    cruise_prefix: The cruise prefix to run dateparse on
+    printsql: True if printing to console, false otherwise
+    datelog: True if creating SQL of min/max cruise range, false otherwise
+    filelog: True if logging SQL to files, false otherwise
+    """
+    cruise_path = path_identifier[cruise_prefix]
+    # SI_path = find_path(cruise_prefix)
+    full_dir_list = sorted(os.listdir(cruise_path))
+
+    regex1 = re.compile(r'^' + cruise_prefix)
+    regex2 = re.compile(r'scs$')
+    dir_list = filter(lambda i: regex1.search(i), full_dir_list)
+
+    for cruise in dir_list:
+        # needs to be updated for use on R2R
+        full_sub_dir_list = sorted(os.listdir(cruise_path + cruise)) # parses just scs subdirectories
+        subdir_list = filter(lambda i: regex2.search(i), full_sub_dir_list)
+        regex3 = regex_identifier(cruise)
+
+        for scs_dir in subdir_list:
+            path = cruise_path + cruise + '/' + scs_dir
+            directory_files = [f for f in listdir(path) if isfile(join(path, f))]
+            directory_files = filter(lambda i: regex3.search(i), directory_files)
+            if len(directory_files) == 0:
+                os.chdir(log_dir)
+                logging.error("Empty directory or other error for cruise {}".format(cruise))
+                os.chdir(script_dir)
+                print("EMPTY OR ERROR FOR CRUISE {}".format(cruise))
+                return
+            
+            mindate,maxdate = datetime.datetime.today(), datetime.datetime(1901, 1, 1)
+
+            sql_datetime_update = []
+            sql_startend_update = ''
+
+            for filename in directory_files:
+                filepattern = filename.split('_')[0]
+                if (re.match("^[0-9]*$", filename.split('T')[0][-8:])):
+                    try:
+                        date_time = filename.split('.')[1]
+                        file_date = date_time.split('T')[0]
+                        file_time = date_time.split('T')[1][:-1]
+                    except:
+                        os.chdir(log_dir)
+                        logging.error("Issue parsing file date/time for RC")
+                        os.chdir(script_dir)
+                        print("Error parsing file date/time for RC")
+                        return
+                    year= file_date[0:4]
+                    month= file_date[4:6]
+                    day= file_date[6:8]
+                    hour= file_time[0:2]
+                    minute= file_time[2:4]
+                    second = "00"
+
+
+                    filedate = datetime.datetime(int(year), int(month), int(day),
+                        int(hour), int(minute), int(second))
+
+                    if filedate < mindate:
+                        mindate = filedate
+                    if filedate > maxdate:
+                        maxdate = filedate
+
+                    sql_datetime_update.append(generate_file_time_sql(year, month, \
+                                            day, hour, minute, second, cruise,\
+                                                filename))
+            sql_startend_update = generate_cruise_startend_sql(mindate, maxdate, \
+                                                            cruise)
+            daterange2csv(cruise, filepattern,  mindate, maxdate)
+
+            sql_datetime_update.sort()
+
+
+            log(printsql, filelog, filepattern, datelog, mindate, maxdate, \
+                    sql_datetime_update, sql_startend_update, cruise)
+            
+
 def cruiseDateParse(cruise, printsql, datelog, filelog):
     """
     Runs dateparse on all instruments of a single cruise
@@ -357,7 +439,7 @@ def generate_cruise_startend_sql(mindate, maxdate, cruise):
                             + '\' WHERE cruise = \'' + cruise +'\';'
     return sql_line
 
-def regex_identifier(cruise, filepattern):
+def regex_identifier(cruise, filepattern=''):
     """
     Identifies how to parse the file by cruise and filepattern
 
@@ -371,7 +453,7 @@ def regex_identifier(cruise, filepattern):
             return re.compile(r'\w+.all$')
         else:
             return re.compile(r'\w+.raw$')
-    elif (cruise[:2] == "OC"):
+    elif (cruise[:2] == "OC" or cruise[:2] == "RC"):
         return re.compile(r'\w+.Raw$')
 
 def parse_date_ranges(cruise, directory_files, filepattern):

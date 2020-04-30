@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-from parseFunctions import massDateParse
-from parseFunctions import multibeamMassDateParse
+from parseFunctions import massDateParse, multibeamMassDateParse, RC_massDateParse
 import sys
 
 if (len(sys.argv) == 1 or sys.argv[1] == '-h'):
@@ -37,6 +36,9 @@ if "-SI" in sys.argv:
 
 if "-MB" in sys.argv:
   MB = True
+
+if cruise_prefix == 'RC':
+  RC_massDateParse(cruise_prefix, printsql, datelog, filelog)
 
 if SI:
   massDateParse(cruise_prefix, printsql, datelog, filelog)
