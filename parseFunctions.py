@@ -256,13 +256,26 @@ def RC_massDateParse(cruise_prefix, printsql, datelog, filelog):
             sql_datetime_update = []
             sql_startend_update = ''
 
+            saved_filepattern = ''
+            directory_files.sort()
+
             for filename in directory_files:
                 filepattern = filename.split('_')[0]
-                if (re.match("^[0-9]*$", filename.split('T')[0][-8:])):
+                if saved_filepattern == '':
+                    saved_filepattern = filepattern
+                if filepattern != saved_filepattern:
+                    sql_datetime_update.sort()
+                    daterange2csv(cruise, filepattern,  mindate, maxdate)
+                    log(printsql, filelog, saved_filepattern, datelog, mindate, maxdate, \
+                    sql_datetime_update, sql_startend_update, cruise)
+                    sql_datetime_update = []
+                    saved_filepattern = filepattern
+                    mindate,maxdate = datetime.datetime.today(), datetime.datetime(1901, 1, 1)
+                iso_date = filename.split('_')[1].split('.')[0]
+                if (re.match("^[0-9]*$", iso_date[:8])):
                     try:
-                        date_time = filename.split('.')[1]
-                        file_date = date_time.split('T')[0]
-                        file_time = date_time.split('T')[1][:-1]
+                        file_date = iso_date.split('-')[0]
+                        file_time = iso_date.split('-')[1]
                     except:
                         os.chdir(log_dir)
                         logging.error("Issue parsing file date/time for RC")
@@ -279,6 +292,7 @@ def RC_massDateParse(cruise_prefix, printsql, datelog, filelog):
 
                     filedate = datetime.datetime(int(year), int(month), int(day),
                         int(hour), int(minute), int(second))
+
 
                     if filedate < mindate:
                         mindate = filedate
