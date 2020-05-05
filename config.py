@@ -35,7 +35,8 @@ ship_directory = {
     'Sikuliaq': '/mnt/gdc/data/r2r/scratch/edu.uaf',
     'Sproul': '/mnt/gdc/data/r2r/scratch/edu.ucsd.sio',
     'Oceanus': '/mnt/gdc/data/r2r/scratch/edu.oregonstate',
-    'Rachel Carson': '/mnt/gdc/data/r2r/scratch/edu.washington'
+    'Rachel Carson': '/mnt/gdc/data/r2r/scratch/edu.washington',
+    # add TN
 }
 scripps_ships = ['SP', 'RR', 'SR', 'HLY', 'FL']
 orgs = ['SIO', 'OSU', 'UAF']
@@ -82,6 +83,7 @@ SIO_cruise_path = "/mnt/gdc/data/r2r/scratch/edu.ucsd.sio/"
 OC_cruise_path = ship_directory['Oceanus'] + '/'
 SKQ_cruise_path = ship_directory['Sikuliaq'] + '/'
 RC_cruise_path = ship_directory['Rachel Carson'] + '/'
+TN_cruise_path = ship_directory['Rachel Carson'] + '/'
 path_identifier = {
     'HLY': HLY_cruise_path,
     'SP': SIO_cruise_path,
@@ -89,5 +91,6 @@ path_identifier = {
     'SR': SIO_cruise_path,
     'OC': OC_cruise_path,
     'SKQ': SKQ_cruise_path,
-    'RC': RC_cruise_path
+    'RC': RC_cruise_path,
+    'TN': TN_cruise_path
 }

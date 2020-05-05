@@ -103,7 +103,7 @@ def dateparser(cruise, filepattern, printsql, datelog, filelog):
                 minute = file_time[2:4]
                 second = file_time[4:6]
 
-            elif cruise[:2] == "OC":
+            elif cruise[:2] == "OC" or cruise[:2] == "TN":
                 try:
                     file_date = filename.split('_')[1]
                     file_time = filename.split('-')[-1]
@@ -182,16 +182,18 @@ def massDateParse(cruise_prefix, printsql, datelog, filelog):
     SI_path = find_path(cruise_prefix)
     full_dir_list = sorted(os.listdir(cruise_path))
 
-    if cruise_prefix != "OC": # filters to just .tar directories
-        roger_regex = re.compile(r'^' + cruise_prefix + '.*tar$')
-        dir_list = filter(lambda i: roger_regex.search(i), full_dir_list)
-    elif cruise_prefix == "OC":
+    if cruise_prefix == "OC": # filters to just .tar directories
         roger_regex = re.compile(r'^' + cruise_prefix.lower() + '\d*\w$')
-        dir_list = filter(lambda i: roger_regex.search(i), full_dir_list)
+    elif cruise_prefix == "TN":
+        roger_regex = re.compile(r'^' + cruise_prefix + '\d*\w$')
+    else:
+        roger_regex = re.compile(r'^' + cruise_prefix + '.*tar$')
+
+    dir_list = filter(lambda i: roger_regex.search(i), full_dir_list)
 
     for cruise in dir_list:
-        # needs to be updated for use on R2R
-        if cruise_prefix != "OC" and cruise_prefix != "SKQ":
+        # needs to be updated for use on R2R 
+        if cruise_prefix != "OC" and cruise_prefix != "SKQ" and cruise_prefix != "TN":
             cruise = cruise[:-4]
         path = cruise_path + cruise + SI_path
 
@@ -369,6 +371,8 @@ def multibeamMassDateParse(cruise_prefix, printsql, datelog, filelog):
 
 
 def daterange2csv(cruise, device, mindate, maxdate):
+    if cruise[:2] == 'RC' and len(cruise) == 5:
+        cruise = cruise[:2] + '0' + cruise[2:]
     cruise_abbrev = get_ship_abbreviation(cruise)
     f = open("./dateparselogs/dateranges/{}_{}_dateranges.csv".format(isoDate, cruise_abbrev), "a+")
     if not f.read(1):
@@ -467,87 +471,8 @@ def regex_identifier(cruise, filepattern=''):
             return re.compile(r'\w+.all$')
         else:
             return re.compile(r'\w+.raw$')
-    elif (cruise[:2] == "OC" or cruise[:2] == "RC"):
+    elif (cruise[:2] == "OC" or cruise[:2] == "RC" or cruise[:2] == "TN"):
         return re.compile(r'\w+.Raw$')
-
-def parse_date_ranges(cruise, directory_files, filepattern):
-    """
-    Parses the dates of files for min and max dates
-
-    cruise: The cruise ID
-    directory_files: All files in the path specified
-    filepattern: Usually the device type
-    """
-
-    if (cruise[:2] == "RR" or cruise[:2] == "SR" or cruise[:3] == "HLY"
-        or cruise[:2] == "SP"):
-        if (filepattern == "multibeam"):
-            try:
-                minmaxdate = directory_files[0].split('_')[1]
-                minmaxtime = directory_files[0].split('_')[2]
-            except:
-                return
-            minyear=maxyear= int(minmaxdate[0:4])
-            minmonth=maxmonth= int(minmaxdate[4:6])
-            minday=maxday= int(minmaxdate[6:8])
-            minhour=maxhour= int(minmaxtime[0:2])
-            minminute=maxminute= int(minmaxtime[2:4])
-            minsecond=maxsecond= int(minmaxtime[4:6])
-
-        else:
-            minmaxdate = directory_files[0].split('_')[-1]
-            minyear=maxyear= int(minmaxdate[0:4])
-            minmonth=maxmonth= int(minmaxdate[4:6])
-            minday=maxday= int(minmaxdate[6:8])
-            minhour=maxhour= int(minmaxdate[8:10])
-            minminute=maxminute= int(minmaxdate[10:12])
-            minsecond=maxsecond= int(minmaxdate[12:14])
-    elif (cruise[:2] == "OC"):
-        try:
-            minmaxdate = directory_files[0].split('_')[1]
-            minmaxtime = directory_files[0].split('-')[-1]
-        except:
-            return
-        minyear=maxyear= int(minmaxdate[0:4])
-        minmonth=maxmonth= int(minmaxdate[4:6])
-        minday=maxday= int(minmaxdate[6:8])
-        minhour=maxhour= int(minmaxtime[0:2])
-        minminute=maxminute= int(minmaxtime[2:4])
-        minsecond=maxsecond= int(minmaxtime[4:6])
-    mindate = datetime.datetime(minyear, minmonth, minday, minhour, minminute, minsecond)
-    maxdate = datetime.datetime(maxyear, maxmonth, maxday, maxhour, maxminute, maxsecond)
-    return mindate, maxdate
-
-def parse_file_date(filename, filepattern):
-    """
-    Parses the file date time based off of the file pattern
-
-    filename: The full file name
-    filepattern: Usually the device type
-    """
-
-    if (filepattern == "multibeam"):
-        file_date = filename.split('_')[1]  # grabs date information
-        file_time = filename.split('_')[2]
-        year = file_date[0:4]
-        month = file_date[4:6]
-        day = file_date[6:8]
-        hour = file_time[0:2]
-        minute = file_time[2:4]
-        second = file_time[4:6]
-
-    else:
-        file_date = filename.split('_')[-1]  # grabs date information
-        year = file_date[0:4]
-        month = file_date[4:6]
-        day = file_date[6:8]
-        hour = file_date[8:10]
-        minute = file_date[10:12]
-        second = file_date[12:14]
-
-    filedate = datetime.datetime(int(year), int(month), int(day),
-        int(hour), int(minute), int(second))
-    return filedate
 
 def find_path(cruise_prefix):
     """
@@ -566,4 +491,7 @@ def find_path(cruise_prefix):
         SI_path = "/lds/raw"
     elif cruise_prefix == "SP":
         SI_path = "/SerialInstruments"
+    elif cruise_prefix == "TN":
+        SI_path = "/scs"
+    
     return SI_path
