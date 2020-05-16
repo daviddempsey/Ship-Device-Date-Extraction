@@ -60,8 +60,6 @@ def dateparser(cruise, filepattern, printsql, datelog, filelog):
         cruise = cruise.lower()
     path = cruise_path + cruise + SI_path
     cruise = cruise.upper();
-    if cruise_prefix == "SKQ":
-        path = cruise_path + cruise + ".tar/" + cruise + SI_path
     path = path + '/' + filepattern
     directory_files = [f for f in listdir(path) if isfile(join(path, f))]
     print(path)
@@ -184,7 +182,7 @@ def massDateParse(cruise_prefix, printsql, datelog, filelog):
 
     if cruise_prefix == "OC": # filters to just .tar directories
         roger_regex = re.compile(r'^' + cruise_prefix.lower() + '\d*\w$')
-    elif cruise_prefix == "TN":
+    elif cruise_prefix == "TN" or cruise_prefix == "SKQ":
         roger_regex = re.compile(r'^' + cruise_prefix + '\d*\w$')
     else:
         roger_regex = re.compile(r'^' + cruise_prefix + '.*tar$')
@@ -198,8 +196,7 @@ def massDateParse(cruise_prefix, printsql, datelog, filelog):
         path = cruise_path + cruise + SI_path
 
         if cruise_prefix == "SKQ":
-            path = cruise_path + cruise + "/" + cruise[:-4] + SI_path
-            cruise = cruise[:-4]
+            path = cruise_path + cruise + SI_path
 
         cruise = cruise.upper()
 
