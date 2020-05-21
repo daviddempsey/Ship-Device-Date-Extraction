@@ -216,7 +216,7 @@ def massDateParse(cruise_prefix, printsql, datelog, filelog):
                     datelog, filelog)
 
 
-def RC_massDateParse(cruise_prefix, printsql, datelog, filelog):
+def RC_massDateParse(printsql, datelog, filelog):
     """
     Runs a date parse on Rachel Carson cruises
 
@@ -225,7 +225,7 @@ def RC_massDateParse(cruise_prefix, printsql, datelog, filelog):
     datelog: True if creating SQL of min/max cruise range, false otherwise
     filelog: True if logging SQL to files, false otherwise
     """
-    cruise_path = path_identifier[cruise_prefix]
+    cruise_path = path_identifier['RC']
     # SI_path = find_path(cruise_prefix)
     full_dir_list = sorted(os.listdir(cruise_path))
 
@@ -310,7 +310,7 @@ def RC_massDateParse(cruise_prefix, printsql, datelog, filelog):
 
             log(printsql, filelog, filepattern, datelog, mindate, maxdate, \
                     sql_datetime_update, sql_startend_update, cruise)
-            
+
 
 def cruiseDateParse(cruise, printsql, datelog, filelog):
     """

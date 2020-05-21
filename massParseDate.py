@@ -38,7 +38,7 @@ if "-MB" in sys.argv:
   MB = True
 
 if cruise_prefix == 'RC':
-  RC_massDateParse(cruise_prefix, printsql, datelog, filelog)
+  RC_massDateParse(printsql, datelog, filelog)
 
 if SI:
   massDateParse(cruise_prefix, printsql, datelog, filelog)

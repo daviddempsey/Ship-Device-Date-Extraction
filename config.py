@@ -36,6 +36,7 @@ ship_directory = {
     'Sproul': '/mnt/gdc/data/r2r/scratch/edu.ucsd.sio',
     'Oceanus': '/mnt/gdc/data/r2r/scratch/edu.oregonstate',
     'Rachel Carson': '/mnt/gdc/data/r2r/scratch/edu.washington',
+    'Blue Heron': '/mnt/gdc/data/r2r/scratch/edu.umn.d'
     # add TN
 }
 scripps_ships = ['SP', 'RR', 'SR', 'HLY', 'FL']
@@ -84,6 +85,7 @@ OC_cruise_path = ship_directory['Oceanus'] + '/'
 SKQ_cruise_path = ship_directory['Sikuliaq'] + '/'
 RC_cruise_path = ship_directory['Rachel Carson'] + '/'
 TN_cruise_path = ship_directory['Rachel Carson'] + '/'
+BH_cruise_path = ship_directory['Blue Heron'] + '/'
 path_identifier = {
     'HLY': HLY_cruise_path,
     'SP': SIO_cruise_path,
@@ -92,5 +94,6 @@ path_identifier = {
     'OC': OC_cruise_path,
     'SKQ': SKQ_cruise_path,
     'RC': RC_cruise_path,
-    'TN': TN_cruise_path
+    'TN': TN_cruise_path,
+    'BH': BH_cruise_path
 }
