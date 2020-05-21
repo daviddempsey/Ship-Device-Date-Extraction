@@ -229,7 +229,7 @@ def RC_massDateParse(printsql, datelog, filelog):
     # SI_path = find_path(cruise_prefix)
     full_dir_list = sorted(os.listdir(cruise_path))
 
-    regex1 = re.compile(r'^' + cruise_prefix)
+    regex1 = re.compile(r'^' + 'RC')
     regex2 = re.compile(r'scs$')
     dir_list = filter(lambda i: regex1.search(i), full_dir_list)
 
@@ -311,6 +311,101 @@ def RC_massDateParse(printsql, datelog, filelog):
             log(printsql, filelog, filepattern, datelog, mindate, maxdate, \
                     sql_datetime_update, sql_startend_update, cruise)
 
+
+def BH_massDateParse(cruise_prefix, printsql, datelog, filelog):
+    """
+    Runs a date parse on Blue Heron cruises
+
+    cruise_prefix: The cruise prefix to run dateparse on
+    printsql: True if printing to console, false otherwise
+    datelog: True if creating SQL of min/max cruise range, false otherwise
+    filelog: True if logging SQL to files, false otherwise
+    """
+    cruise_path = path_identifier['BH']
+    # SI_path = find_path(cruise_prefix)
+    full_dir_list = sorted(os.listdir(cruise_path))
+
+    regex1 = re.compile(r'^' + cruise_prefix)
+    regex2 = re.compile(r'scs$')
+    dir_list = filter(lambda i: regex1.search(i), full_dir_list)
+
+    for cruise in dir_list:
+        # needs to be updated for use on R2R
+        full_sub_dir_list = sorted(os.listdir(cruise_path + cruise)) # parses just scs subdirectories
+        subdir_list = filter(lambda i: regex2.search(i), full_sub_dir_list)
+        regex3 = regex_identifier(cruise)
+
+        for scs_dir in subdir_list:
+            path = cruise_path + cruise + '/' + scs_dir
+            directory_files = [f for f in listdir(path) if isfile(join(path, f))]
+            directory_files = filter(lambda i: regex3.search(i), directory_files)
+            if len(directory_files) == 0:
+                os.chdir(log_dir)
+                logging.error("Empty directory or other error for cruise {}".format(cruise))
+                os.chdir(script_dir)
+                print("EMPTY OR ERROR FOR CRUISE {}".format(cruise))
+                return
+            
+            mindate,maxdate = datetime.datetime.today(), datetime.datetime(1901, 1, 1)
+
+            sql_datetime_update = []
+            sql_startend_update = ''
+
+            saved_filepattern = ''
+            directory_files.sort()
+
+            for filename in directory_files:
+                filepattern = filename.split('_')[0]
+                if saved_filepattern == '':
+                    saved_filepattern = filepattern
+                if filepattern != saved_filepattern:
+                    sql_datetime_update.sort()
+                    daterange2csv(cruise, filepattern,  mindate, maxdate)
+                    log(printsql, filelog, saved_filepattern, datelog, mindate, maxdate, \
+                    sql_datetime_update, sql_startend_update, cruise)
+                    sql_datetime_update = []
+                    saved_filepattern = filepattern
+                    mindate,maxdate = datetime.datetime.today(), datetime.datetime(1901, 1, 1)
+                iso_date = filename.split('_')[1].split('.')[0]
+                if (re.match("^[0-9]*$", iso_date[:8])):
+                    try:
+                        file_date = iso_date.split('-')[0]
+                        file_time = iso_date.split('-')[1]
+                    except:
+                        os.chdir(log_dir)
+                        logging.error("Issue parsing file date/time for RC")
+                        os.chdir(script_dir)
+                        print("Error parsing file date/time for RC")
+                        return
+                    year= file_date[0:4]
+                    month= file_date[4:6]
+                    day= file_date[6:8]
+                    hour= file_time[0:2]
+                    minute= file_time[2:4]
+                    second = "00"
+
+
+                    filedate = datetime.datetime(int(year), int(month), int(day),
+                        int(hour), int(minute), int(second))
+
+
+                    if filedate < mindate:
+                        mindate = filedate
+                    if filedate > maxdate:
+                        maxdate = filedate
+
+                    sql_datetime_update.append(generate_file_time_sql(year, month, \
+                                            day, hour, minute, second, cruise,\
+                                                filename))
+            sql_startend_update = generate_cruise_startend_sql(mindate, maxdate, \
+                                                            cruise)
+            daterange2csv(cruise, filepattern,  mindate, maxdate)
+
+            sql_datetime_update.sort()
+
+
+            log(printsql, filelog, filepattern, datelog, mindate, maxdate, \
+                    sql_datetime_update, sql_startend_update, cruise)
 
 def cruiseDateParse(cruise, printsql, datelog, filelog):
     """
