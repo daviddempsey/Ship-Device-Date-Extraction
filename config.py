@@ -36,7 +36,7 @@ ship_directory = {
     'Sproul': '/mnt/gdc/data/r2r/scratch/edu.ucsd.sio',
     'Oceanus': '/mnt/gdc/data/r2r/scratch/edu.oregonstate',
     'Rachel Carson': '/mnt/gdc/data/r2r/scratch/edu.washington',
-    'Blue Heron': '/mnt/gdc/data/r2r/scratch/edu.umn.d'
+    'Blue Heron': '/mnt/gdc/data/r2r/scratch/edu.umn.d/2019_data'
     # add TN
 }
 scripps_ships = ['SP', 'RR', 'SR', 'HLY', 'FL']

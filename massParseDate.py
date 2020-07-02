@@ -1,17 +1,17 @@
 #!/usr/bin/env python
-from parseFunctions import massDateParse, multibeamMassDateParse, RC_massDateParse
+from parseFunctions import massDateParse, multibeamMassDateParse, RC_massDateParse, BH_massDateParse
 import sys
 
 if (len(sys.argv) == 1 or sys.argv[1] == '-h'):
-  print("\nArguments for massParseDate.py:\n ")
-  print("./massParseDate.py [cruise prefix] [any flags]")
-  print("DEFAULT: prints SQL, min/max date range, and write log file")
-  print("-u: prints SQL")
-  print("-m: writes date range update SQL to log file")
-  print("-l: writes file update SQL to log file")
-  print("-SI: runs on Serial Instruments")
-  print("-MB: runs on Multibeam\n")
-  quit()
+    print("\nArguments for massParseDate.py:\n ")
+    print("./massParseDate.py [cruise prefix] [any flags]")
+    print("DEFAULT: prints SQL, min/max date range, and write log file")
+    print("-u: prints SQL")
+    print("-m: writes date range update SQL to log file")
+    print("-l: writes file update SQL to log file")
+    print("-SI: runs on Serial Instruments")
+    print("-MB: runs on Multibeam\n")
+    quit()
 
 
 printsql = False
@@ -23,25 +23,28 @@ cruise_prefix = sys.argv[1]
 
 
 if "-u" in sys.argv:
-	printsql = True
+    printsql = True
 
 if "-m" in sys.argv:
-	datelog = True
+    datelog = True
 
 if "-l" in sys.argv:
-	filelog = True
+    filelog = True
 
 if "-SI" in sys.argv:
-  SI = True
+    SI = True
 
 if "-MB" in sys.argv:
-  MB = True
+    MB = True
 
 if cruise_prefix == 'RC':
-  RC_massDateParse(printsql, datelog, filelog)
+    RC_massDateParse(printsql, datelog, filelog)
+
+if cruise_prefix == 'BH':
+    BH_massDateParse(printsql, datelog, filelog)
 
 if SI:
-  massDateParse(cruise_prefix, printsql, datelog, filelog)
+    massDateParse(cruise_prefix, printsql, datelog, filelog)
 
 if MB:
-  multibeamMassDateParse(cruise_prefix, printsql, datelog, filelog)
+    multibeamMassDateParse(cruise_prefix, printsql, datelog, filelog)
