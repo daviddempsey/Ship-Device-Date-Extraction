@@ -518,8 +518,8 @@ def cruiseDateParse(cruise, printsql, datelog, filelog):
     cruise_path = path_identifier[cruise_prefix]
     SI_path = find_path(cruise_prefix)
     path = cruise_path + cruise + SI_path
-    if cruise_prefix == "SKQ":
-        path = cruise_path + cruise + ".tar/" + cruise + SI_path
+    #if cruise_prefix == "SKQ":
+        #path = cruise_path + cruise + ".tar/" + cruise + SI_path
 
     cruise = cruise.upper()
     try:
