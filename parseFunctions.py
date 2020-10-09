@@ -52,7 +52,7 @@ def dateparser(cruise, filepattern, printsql, datelog, filelog):
     filelog: True if logging SQL to files, false otherwise
     """
 
-    logging.info("Running dateparser on cruise {} and device {}".format(
+    logging.info("Running dateparser on cruise {0} and device {1}".format(
         cruise, filepattern))
 
     cruise_prefix = get_ship_abbreviation(cruise)
@@ -80,10 +80,10 @@ def dateparser(cruise, filepattern, printsql, datelog, filelog):
             return
     if len(directory_files) == 0:
         os.chdir(log_dir)
-        logging.error("Empty directory or other error for cruise {} and device {}".format(
+        logging.error("Empty directory or other error for cruise {0} and device {1}".format(
             cruise, filepattern))
         os.chdir(script_dir)
-        print("EMPTY OR ERROR FOR CRUISE {} AND DEVICE {}".format(
+        print("EMPTY OR ERROR FOR CRUISE {0} AND DEVICE {1}".format(
             cruise, filepattern))
         return
 
@@ -185,19 +185,23 @@ def massDateParse(cruise_prefix, printsql, datelog, filelog):
 
     if cruise_prefix == "OC":  # filters to just .tar directories
         roger_regex = re.compile(r'^' + cruise_prefix.lower() + '\d*\w$')
-    elif cruise_prefix == "TN" or cruise_prefix == "SKQ":
+    elif cruise_prefix == "TN" or cruise_prefix == "SKQ" or cruise_prefix == "SR"\
+            or cruise_prefix == "RR" or cruise_prefix == "SP":
         roger_regex = re.compile(r'^' + cruise_prefix + '\d*\w$')
     else:
         roger_regex = re.compile(r'^' + cruise_prefix + '.*tar$')
+        #roger_regex = re.compile(r'^' + cruise_prefix + '\d*\w$')
 
+    print(full_dir_list)
     dir_list = filter(lambda i: roger_regex.search(i), full_dir_list)
+    print(dir_list)
 
     for cruise in dir_list:
         # needs to be updated for use on R2R
-        if cruise_prefix != "OC" and cruise_prefix != "SKQ" and cruise_prefix != "TN":
-            cruise = cruise[:-4]
+        #if cruise_prefix != "OC" and cruise_prefix != "SKQ" and cruise_prefix != "TN":
+        #    cruise = cruise[:-4]
         path = cruise_path + cruise + SI_path
-
+        print(path)
         if cruise_prefix == "SKQ":
             path = cruise_path + cruise + SI_path
 
@@ -208,9 +212,9 @@ def massDateParse(cruise_prefix, printsql, datelog, filelog):
         except:
             os.chdir(log_dir)
             logging.error(
-                "Unable to get instrument list for cruise {} at location {}".format(cruise, path))
+                "Unable to get instrument list for cruise {0} at location {1}".format(cruise, path))
             os.chdir(script_dir)
-            print("Unable to get instrument list for cruise {}".format(cruise))
+            print("Unable to get instrument list for cruise {0}".format(cruise))
             print(path)
             continue
         for instrument in instruments_list:
@@ -251,9 +255,9 @@ def RC_massDateParse(printsql, datelog, filelog):
             if len(directory_files) == 0:
                 os.chdir(log_dir)
                 logging.error(
-                    "Empty directory or other error for cruise {}".format(cruise))
+                    "Empty directory or other error for cruise {0}".format(cruise))
                 os.chdir(script_dir)
-                print("EMPTY OR ERROR FOR CRUISE {}".format(cruise))
+                print("EMPTY OR ERROR FOR CRUISE {0}".format(cruise))
                 continue
 
             mindate, maxdate = datetime.datetime.today(), datetime.datetime(1901, 1, 1)
@@ -345,9 +349,9 @@ def BH_massDateParse(printsql, datelog, filelog):
             if len(directory_files) == 0:
                 os.chdir(log_dir)
                 logging.error(
-                    "Empty directory or other error for cruise {}".format(cruise))
+                    "Empty directory or other error for cruise {0}".format(cruise))
                 os.chdir(script_dir)
-                print("EMPTY OR ERROR FOR CRUISE {}".format(cruise))
+                print("EMPTY OR ERROR FOR CRUISE {0}".format(cruise))
                 return
 
             mindate, maxdate = datetime.datetime.today(), datetime.datetime(1901, 1, 1)
@@ -440,9 +444,9 @@ def BH_massDateParse(cruise_prefix, printsql, datelog, filelog):
             if len(directory_files) == 0:
                 os.chdir(log_dir)
                 logging.error(
-                    "Empty directory or other error for cruise {}".format(cruise))
+                    "Empty directory or other error for cruise {0}".format(cruise))
                 os.chdir(script_dir)
-                print("EMPTY OR ERROR FOR CRUISE {}".format(cruise))
+                print("EMPTY OR ERROR FOR CRUISE {0}".format(cruise))
                 return
 
             mindate, maxdate = datetime.datetime.today(), datetime.datetime(1901, 1, 1)
@@ -527,9 +531,9 @@ def cruiseDateParse(cruise, printsql, datelog, filelog):
     except:
         os.chdir(log_dir)
         logging.error(
-            "Unable to get instrument list for cruise {} at location {}".format(cruise, path))
+            "Unable to get instrument list for cruise {0} at location {1}".format(cruise, path))
         os.chdir(script_dir)
-        print("Unable to get instrument list for cruise {}".format(cruise))
+        print("Unable to get instrument list for cruise {0}".format(cruise))
         print(path)
     for instrument in instruments_list:
         if instrument == 'events':
@@ -566,10 +570,10 @@ def daterange2csv(cruise, device, mindate, maxdate):
         cruise = cruise[:2] + '0' + cruise[2:]
     cruise_abbrev = get_ship_abbreviation(cruise)
     f = open(
-        "./dateparselogs/dateranges/{}_{}_dateranges.csv".format(isoDate, cruise_abbrev), "a+")
+        "./dateparselogs/dateranges/{0}_{1}_dateranges.csv".format(isoDate, cruise_abbrev), "a+")
     if not f.read(1):
         f.write("cruise,devicetype,start_date,end_date\n")
-    f.write('{},{},{},{}'.format(cruise, device, mindate, maxdate) + '\n')
+    f.write('{0},{1},{2},{3}'.format(cruise, device, mindate, maxdate) + '\n')
     f.close()
 
 

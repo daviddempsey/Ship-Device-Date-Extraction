@@ -37,6 +37,7 @@ cruise = sys.argv[1]
 printsql = False
 datelog = False
 filelog = False
+all_devices = False
 
 
 if "-u" in sys.argv:
