@@ -8,6 +8,7 @@ to a file. The default option is to do all three.
 """
 
 import sys
+import os
 from parseFunctions import dateparser, cruiseDateParse
 #from parseFunctions import multibeamdateparser
 
@@ -25,23 +26,25 @@ if (len(sys.argv) == 1 or sys.argv[1] == '-h'):
     print("\nArguments for parseDate.py:\n ")
     print("./parseDate.py [cruise] [filepattern] [any flags]")
     print("DEFAULT: prints SQL, min/max date range, and write log file")
-    print("-u: prints SQL")
     print("-m: writes date range update SQL to log file")
     print("-l: writes file update SQL to log file")
+    print("-d: writes date ranges to csv file")
     print("-c: runs all devices for a single cruise\n")
     quit()
 
 
 filepattern = sys.argv[2]
 cruise = sys.argv[1]
+path = os.getcwd() + "/" #must be called in shipment directory
 printsql = False
 datelog = False
 filelog = False
+csvlog = False
 all_devices = False
 
 
-if "-u" in sys.argv:
-    printsql = True
+if "-d" in sys.argv:
+    csvlog = True
 
 if "-m" in sys.argv:
     datelog = True
@@ -55,9 +58,9 @@ if "-c" in sys.argv:
 #if "SerialInstruments" in path:
 #   print("recognized as SerialInstrument")
 if all_devices:
-    cruiseDateParse(cruise, printsql, datelog, filelog)
+    cruiseDateParse(cruise, path, csvlog, datelog, filelog)
 else:
-    dateparser(cruise, filepattern, printsql, datelog, filelog)
+    dateparser(cruise, path, filepattern, csvlog, datelog, filelog)
 
 #else:
 #    multibeamdateparser(cruise, path, printsql, datelog, filelog)
