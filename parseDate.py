@@ -30,6 +30,7 @@ if (len(sys.argv) == 1 or sys.argv[1] == '-h'):
     print("-l: writes file update SQL to log file")
     print("-d: writes date ranges to csv file")
     print("-c: runs all devices for a single cruise\n")
+    print("-o [new path]: overrides default cruise path structure\n")
     quit()
 
 
@@ -40,27 +41,29 @@ printsql = False
 datelog = False
 filelog = False
 csvlog = False
+cruise_path_override = False
 all_devices = False
+SI_path = ""
 
-
-if "-d" in sys.argv:
-    csvlog = True
-
-if "-m" in sys.argv:
-    datelog = True
-
-if "-l" in sys.argv:
-    filelog = True
-
-if "-c" in sys.argv:
-    all_devices = True
+for i in range(2, len(sys.argv)):
+    flag = sys.argv[i]
+    if flag == "-d":
+        csvlog = True
+    if flag == "-m":
+        datelog = True
+    if flag == "-l":
+        filelog = True
+    if flag == "-c":
+        all_devices = True
+    if flag == "-o":
+        SI_path = sys.argv[i+1]
 
 #if "SerialInstruments" in path:
 #   print("recognized as SerialInstrument")
 if all_devices:
-    cruiseDateParse(cruise, path, csvlog, datelog, filelog)
+    cruiseDateParse(cruise, path, csvlog, datelog, filelog, SI_path)
 else:
-    dateparser(cruise, path, filepattern, csvlog, datelog, filelog)
+    dateparser(cruise, path, filepattern, csvlog, datelog, filelog, SI_path)
 
 #else:
 #    multibeamdateparser(cruise, path, printsql, datelog, filelog)

@@ -39,7 +39,7 @@ os.chdir(script_dir)
 isoDate = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f%z')
 
 
-def dateparser(cruise, shipment_path, filepattern, csvlog, datelog, filelog):
+def dateparser(cruise, shipment_path, filepattern, csvlog, datelog, filelog, SI_path=""):
     """
     Creates SQL logs of the starting date of files in filesets and also
     creates min/max cruise range SQL logs
@@ -56,7 +56,8 @@ def dateparser(cruise, shipment_path, filepattern, csvlog, datelog, filelog):
         cruise, filepattern))
 
     cruise_prefix = get_ship_abbreviation(cruise)
-    SI_path = find_path(cruise_prefix)
+    if SI_path == "":
+        SI_path = find_path(cruise_prefix)
     if (cruise_prefix == "OC"):
         cruise = cruise.lower()
     path = shipment_path + cruise + SI_path
@@ -508,7 +509,7 @@ def BH_massDateParse(cruise_prefix, printsql, datelog, filelog):
                 sql_datetime_update, sql_startend_update, cruise)
 
 
-def cruiseDateParse(cruise, shipment_path, csvlog, datelog, filelog):
+def cruiseDateParse(cruise, shipment_path, csvlog, datelog, filelog, SI_path=""):
     """
     Runs dateparse on all instruments of a single cruise
 
@@ -519,8 +520,11 @@ def cruiseDateParse(cruise, shipment_path, csvlog, datelog, filelog):
     """
     cruise = cruise.upper()
     cruise_prefix = get_ship_abbreviation(cruise)
-    SI_path = find_path(cruise_prefix)
+    if SI_path == "":
+        SI_path = find_path(cruise_prefix)
     path = shipment_path + cruise + SI_path
+    print(path)
+    return
 
     try:
         instruments_list = os.walk(path).next()[1]
@@ -535,7 +539,7 @@ def cruiseDateParse(cruise, shipment_path, csvlog, datelog, filelog):
         if instrument == 'events':
             pass
         dateparser(cruise, shipment_path, instrument, csvlog,
-                   datelog, filelog)
+                   datelog, filelog, SI_path)
 
 
 ### NEEDS TO BE UPDATED FOR GDC ###
