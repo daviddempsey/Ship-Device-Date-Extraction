@@ -86,6 +86,9 @@ for cruise in cruise_list:
             dateparser(cruise, path, filepattern, csvlog, datelog, filelog, SI_path)
     if dateparser_selection == 'RC_dateparser':
         RC_dateparser(cruise, path, csvlog, datelog, filelog)
-
+    if dateparser_selection == 'BH_dateparser':
+        #TODO
+        #BH_dateparser(cruise, path, csvlog, datelog, filelog)
+#TODO
 #else:
 #    multibeamdateparser(cruise, path, printsql, datelog, filelog)
