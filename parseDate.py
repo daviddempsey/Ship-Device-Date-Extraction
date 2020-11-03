@@ -9,7 +9,7 @@ to a file. The default option is to do all three.
 
 import sys
 import os
-from parseFunctions import dateparser, cruiseDateParse, listCruises
+from parseFunctions import dateparser, cruiseDateParse, listCruises, RC_dateparser, BH_dateparser
 from scripts import get_ship_abbreviation
 from config import dateparser_by_cruise
 #from parseFunctions import multibeamdateparser
@@ -26,15 +26,18 @@ __status__ = "Development"
 
 if (len(sys.argv) == 1 or sys.argv[1] == '-h'):
     print("\nArguments for parseDate.py:\n ")
-    print("./parseDate.py [cruise] [filepattern] [any flags]\n")
-    print("DEFAULT: prints SQL, min/max date range, and write log file\n")
-    print("-m: writes date range update SQL to log file\n")
-    print("-l: writes file update SQL to log file\n")
-    print("-d: writes date ranges to csv file\n")
-    print("-a: runs on all cruises matching given cruise prefix\n")
-    print("-c: runs all devices\n")
-    print("-o [new path]: overrides default cruise path structure\n")
-    print("-p [dateparser]: used to clarify date parser to use\n")
+    print("./parseDate.py [cruise] [filepattern] [any flags]")
+    print("DEFAULT: prints SQL, min/max date range, and write log file")
+    print("-m: writes date range update SQL to log file")
+    print("-l: writes file update SQL to log file")
+    print("-d: writes date ranges to csv file")
+    print("-a: runs on all cruises matching given cruise prefix")
+    print("-c: runs all devices")
+    print("-o [new path]: overrides default cruise path structure")
+    print("-p [dateparser]: used to clarify date parser to use")
+    print("    1: [year][month][day][second] format")
+    print("    2: [year][month][day]-[second] format")
+    print("    3: [ship prefix][year]_[day ? out of 365]_[second]")
     quit()
 
 
@@ -48,7 +51,7 @@ csvlog = False
 all_devices = False
 dateparser_override = False
 all_cruises = False
-dateparser = ""
+dateparse_method = ""
 SI_path = ""
 
 for i in range(2, len(sys.argv)):
@@ -64,7 +67,8 @@ for i in range(2, len(sys.argv)):
     if flag == "-o":
         SI_path = sys.argv[i+1]
     if flag == "-p":
-        dateparser = sys.argv[i+1]
+        dateparser_override = True
+        dateparse_method = sys.argv[i+1]
     if flag == "-a":
         all_cruises = True
 
@@ -78,17 +82,19 @@ else:
 
 for cruise in cruise_list:
     cruise_prefix = get_ship_abbreviation(cruise)
-    dateparser_selection = dateparser_by_cruise[cruise_prefix]
-    if dateparser_selection == 'dateparser':
+    if not dateparser_override:
+        dateparse_method = dateparser_by_cruise[cruise_prefix]
+    if dateparse_method == '1':
         if all_devices:
             cruiseDateParse(cruise, path, csvlog, datelog, filelog, SI_path)
         else:
             dateparser(cruise, path, filepattern, csvlog, datelog, filelog, SI_path)
-    if dateparser_selection == 'RC_dateparser':
+    if dateparse_method == '2':
         RC_dateparser(cruise, path, csvlog, datelog, filelog)
-    if dateparser_selection == 'BH_dateparser':
+    if dateparse_method == '3':
         #TODO
-        #BH_dateparser(cruise, path, csvlog, datelog, filelog)
+        BH_dateparser(cruise, path, csvlog, datelog, filelog)
 #TODO
 #else:
 #    multibeamdateparser(cruise, path, printsql, datelog, filelog)
+

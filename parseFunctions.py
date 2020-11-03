@@ -63,6 +63,7 @@ def dateparser(cruise, shipment_path, filepattern, csvlog, datelog, filelog, SI_
     path = shipment_path + cruise + SI_path
     cruise = cruise.upper()
     path = path + '/' + filepattern
+    print(path)
     directory_files = [f for f in listdir(path) if isfile(join(path, f))]
     raw_regex = regex_identifier(cruise, filepattern)
     if (raw_regex):
@@ -240,7 +241,8 @@ def RC_dateparser(cruise, shipment_path, csvlog, datelog, filelog):
                 saved_filepattern = filepattern
             if filepattern != saved_filepattern:
                 sql_datetime_update.sort()
-                daterange2csv(cruise, filepattern,  mindate, maxdate)
+                if csvlog or (not filelog and not csvlog and not datelog):
+                    daterange2csv(cruise, filepattern,  mindate, maxdate)
                 log(filelog, saved_filepattern, datelog, mindate, maxdate,
                     sql_datetime_update, sql_startend_update, cruise)
                 sql_datetime_update = []
@@ -275,15 +277,15 @@ def RC_dateparser(cruise, shipment_path, csvlog, datelog, filelog):
                 sql_datetime_update.append(generate_file_time_sql(year, month,
                                                                   day, hour, minute, second, cruise,
                                                                   filename))
-        sql_startend_update = generate_cruise_startend_sql(mindate, maxdate,
-                                                           cruise)
+        #sql_startend_update = generate_cruise_startend_sql(mindate, maxdate,
+        #                                                   cruise)
 
-        if csvlog or (not filelog and not csvlog and not datelog):
-            daterange2csv(cruise, filepattern,  mindate, maxdate)
+        #if csvlog or (not filelog and not csvlog and not datelog):
+        #    daterange2csv(cruise, filepattern,  mindate, maxdate)
 
-        sql_datetime_update.sort()
-        log(filelog, filepattern, datelog, mindate, maxdate,
-            sql_datetime_update, sql_startend_update, cruise)
+        #sql_datetime_update.sort()
+        #log(filelog, filepattern, datelog, mindate, maxdate,
+        #    sql_datetime_update, sql_startend_update, cruise)
 
 
 def BH_dateparser(cruise, shipment_path, csvlog, datelog, filelog):
@@ -302,7 +304,7 @@ def BH_dateparser(cruise, shipment_path, csvlog, datelog, filelog):
     regex_filetype = regex_identifier(cruise)
 
     for adcp_dir in subdir_list:
-        path = cruise_path + cruise + '/' + adcp_dir + "/raw/gp90"
+        path = shipment_path + cruise + '/' + adcp_dir + "/raw/gp90"
         directory_files = [f for f in listdir(
             path) if isfile(join(path, f))]
         directory_files = filter(
@@ -320,21 +322,10 @@ def BH_dateparser(cruise, shipment_path, csvlog, datelog, filelog):
         sql_datetime_update = []
         sql_startend_update = ''
 
-        saved_filepattern = ''  # TODO: rename?
         directory_files.sort()
 
         for filename in directory_files:
             filepattern = filename.split('_')[0]
-            if saved_filepattern == '':
-                saved_filepattern = filepattern
-            if filepattern != saved_filepattern:
-                sql_datetime_update.sort()
-                daterange2csv(cruise, filepattern,  mindate, maxdate)
-                log(filelog, saved_filepattern, datelog, mindate, maxdate,
-                    sql_datetime_update, sql_startend_update, cruise)
-                sql_datetime_update = []
-                saved_filepattern = filepattern
-                mindate, maxdate = datetime.datetime.today(), datetime.datetime(1901, 1, 1)
             julian_date = filename[4:10]
             second = int(filename[11:16])
             try:
@@ -365,7 +356,8 @@ def BH_dateparser(cruise, shipment_path, csvlog, datelog, filelog):
                                                               filename))
         sql_startend_update = generate_cruise_startend_sql(mindate, maxdate,
                                                            cruise)
-        daterange2csv(cruise, "gp90",  mindate, maxdate)
+        if csvlog or (not filelog and not csvlog and not datelog):
+            daterange2csv(cruise, "gp90",  mindate, maxdate)
 
         sql_datetime_update.sort()
         log(filelog, "gp90", datelog, mindate, maxdate,
@@ -387,8 +379,6 @@ def cruiseDateParse(cruise, shipment_path, csvlog, datelog, filelog, SI_path="")
     if SI_path == "":
         SI_path = find_path(cruise_prefix)
     path = shipment_path + cruise + SI_path
-    print(path)
-    return
 
     try:
         instruments_list = os.walk(path).next()[1]
@@ -404,29 +394,6 @@ def cruiseDateParse(cruise, shipment_path, csvlog, datelog, filelog, SI_path="")
             pass
         dateparser(cruise, shipment_path, instrument, csvlog,
                    datelog, filelog, SI_path)
-
-
-# TODO: NEEDS TO BE UPDATED
-def multibeamMassDateParse(cruise_prefix, csvlog, datelog, filelog):
-    """
-    Runs dateparse on various cruises for Multibeam
-
-    cruise_prefix: The cruise prefix to run dateparse on
-    csvlog: True if printing to console, false otherwise
-    datelog: True if creating SQL of min/max cruise range, false otherwise
-    filelog: True if logging SQL to files, false otherwise
-    """
-    full_dir_list = os.listdir("/scratch/r2r/edu.ucsd.sio/")
-    roger_regex = re.compile(r'^' + cruise_prefix + '.*tar$')
-    dir_list = filter(lambda i: roger_regex.search(i), full_dir_list)
-
-    for cruise in dir_list:
-        path = "/scratch/r2r/edu.ucsd.sio/"  \
-            + cruise + "/" + cruise[:-4] + "/data/multibeam/rawdata"
-
-        if (os.path.isdir(path)):
-            dateparser(cruise[:-4], path, "multibeam",
-                       csvlog, datelog, filelog)
 
 
 def daterange2csv(cruise, device, mindate, maxdate):
