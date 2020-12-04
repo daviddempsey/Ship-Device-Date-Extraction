@@ -389,6 +389,7 @@ def cruiseDateParse(cruise, shipment_path, csvlog, datelog, filelog, SI_path="")
         os.chdir(script_dir)
         print("Unable to get instrument list for cruise {0}".format(cruise))
         print(path)
+        return
     for instrument in instruments_list:
         if instrument == 'events':
             pass

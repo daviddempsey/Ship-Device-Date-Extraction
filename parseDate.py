@@ -76,7 +76,7 @@ for i in range(2, len(sys.argv)):
 #   print("recognized as SerialInstrument")
 cruise_list = []
 if all_cruises:
-    cruise_list = listCruises(cruise_arg)
+    cruise_list = listCruises(cruise_arg,path)
 else:
     cruise_list = [cruise_arg]
 
