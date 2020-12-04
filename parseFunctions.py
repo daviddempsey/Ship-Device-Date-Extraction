@@ -13,7 +13,6 @@ import os
 from os import listdir
 from os.path import isfile, join
 from config import *
-from scripts import *
 import datetime
 import logging
 
@@ -277,15 +276,6 @@ def RC_dateparser(cruise, shipment_path, csvlog, datelog, filelog):
                 sql_datetime_update.append(generate_file_time_sql(year, month,
                                                                   day, hour, minute, second, cruise,
                                                                   filename))
-        #sql_startend_update = generate_cruise_startend_sql(mindate, maxdate,
-        #                                                   cruise)
-
-        #if csvlog or (not filelog and not csvlog and not datelog):
-        #    daterange2csv(cruise, filepattern,  mindate, maxdate)
-
-        #sql_datetime_update.sort()
-        #log(filelog, filepattern, datelog, mindate, maxdate,
-        #    sql_datetime_update, sql_startend_update, cruise)
 
 
 def BH_dateparser(cruise, shipment_path, csvlog, datelog, filelog):
@@ -483,7 +473,7 @@ def generate_cruise_startend_sql(mindate, maxdate, cruise):
     return sql_line
 
 
-def regex_identifier(cruise, filepattern=''):  # TODO: Clean this method
+def regex_identifier(cruise, filepattern=''):
     """
     Identifies how to parse the file by cruise and filepattern
 
@@ -519,3 +509,15 @@ def find_path(cruise_prefix):
         SI_path = "/scs"
 
     return SI_path
+
+
+def get_ship_abbreviation(cruise):  # returns 2-letter ship ID
+    ship_abbreviation = ''
+
+    for char in cruise: # iterates through cruise ID
+        if char.isdigit() is False: # appends letters
+            ship_abbreviation = ship_abbreviation + char
+        else: # ignores digits
+            break
+
+    return ship_abbreviation

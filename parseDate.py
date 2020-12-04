@@ -12,7 +12,6 @@ import os
 from parseFunctions import dateparser, cruiseDateParse, listCruises, RC_dateparser, BH_dateparser
 from scripts import get_ship_abbreviation
 from config import dateparser_by_cruise
-#from parseFunctions import multibeamdateparser
 
 __author__ = "David Dempsey"
 __copyright__ = "Copyright 2020, Rolling Deck to Repository"
@@ -72,8 +71,6 @@ for i in range(2, len(sys.argv)):
     if flag == "-a":
         all_cruises = True
 
-#if "SerialInstruments" in path:
-#   print("recognized as SerialInstrument")
 cruise_list = []
 if all_cruises:
     cruise_list = listCruises(cruise_arg,path)
@@ -92,9 +89,5 @@ for cruise in cruise_list:
     if dateparse_method == '2':
         RC_dateparser(cruise, path, csvlog, datelog, filelog)
     if dateparse_method == '3':
-        #TODO
         BH_dateparser(cruise, path, csvlog, datelog, filelog)
-#TODO
-#else:
-#    multibeamdateparser(cruise, path, printsql, datelog, filelog)
 
