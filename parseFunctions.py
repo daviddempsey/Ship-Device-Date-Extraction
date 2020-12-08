@@ -364,8 +364,7 @@ def cruiseDateParse(cruise, shipment_path, csvlog, datelog, filelog, SI_path="")
     datelog: True if creating SQL of min/max cruise range, false otherwise
     filelog: True if logging SQL to files, false otherwise
     """
-    cruise = cruise.upper()
-    cruise_prefix = get_ship_abbreviation(cruise)
+    cruise_prefix = get_ship_abbreviation(cruise.upper())
     if SI_path == "":
         SI_path = find_path(cruise_prefix)
     path = shipment_path + cruise + SI_path
