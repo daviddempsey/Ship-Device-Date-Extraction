@@ -10,7 +10,6 @@ to a file. The default option is to do all three.
 import sys
 import os
 from parseFunctions import dateparser, cruiseDateParse, listCruises, RC_dateparser, BH_dateparser
-from scripts import get_ship_abbreviation
 from config import dateparser_by_cruise
 
 __author__ = "David Dempsey"
@@ -53,6 +52,17 @@ all_cruises = False
 dateparse_method = ""
 SI_path = ""
 
+
+def get_ship_abbreviation(cruise):
+    ship_abbreviation = ''
+    for char in cruise:
+        if not char.isdigit():
+            ship_abbreviation = ship_abbreviation + char
+        else:
+            break
+    return ship_abbreviation
+
+
 for i in range(2, len(sys.argv)):
     flag = sys.argv[i]
     if flag == "-d":
@@ -71,6 +81,7 @@ for i in range(2, len(sys.argv)):
     if flag == "-a":
         all_cruises = True
 
+
 cruise_list = []
 if all_cruises:
     cruise_list = listCruises(cruise_arg,path)
@@ -78,7 +89,7 @@ else:
     cruise_list = [cruise_arg]
 
 for cruise in cruise_list:
-    cruise_prefix = get_ship_abbreviation(cruise)
+    cruise_prefix = get_ship_abbreviation(cruise.upper())
     if not dateparser_override:
         dateparse_method = dateparser_by_cruise[cruise_prefix]
     if dateparse_method == '1':
