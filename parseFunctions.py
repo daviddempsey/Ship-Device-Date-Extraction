@@ -389,9 +389,9 @@ def cruiseDateParse(cruise, shipment_path, csvlog, datelog, filelog, SI_path="")
 def daterange2csv(cruise, device, mindate, maxdate):
     if cruise[:2] == 'RC' and len(cruise) == 5:
         cruise = cruise[:2] + '0' + cruise[2:]
-    cruise_abbrev = get_ship_abbreviation(cruise)
+    #cruise_abbrev = get_ship_abbreviation(cruise)
     f = open(
-        "./{0}_{1}_dateranges.csv".format(isoDate, cruise_abbrev), "a+")
+        "./{0}_{1}_dateranges.csv".format(isoDate, cruise), "a+")
     if not f.read(1):
         f.write("cruise,devicetype,start_date,end_date\n")
     f.write('{0},{1},{2},{3}'.format(cruise, device, mindate, maxdate) + '\n')
